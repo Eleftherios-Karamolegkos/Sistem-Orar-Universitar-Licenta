@@ -3,6 +3,8 @@ from PyQt6.QtWidgets import (
     QPushButton, QVBoxLayout, QMessageBox
 )
 
+from backend.auth_service import authenticate
+
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -37,7 +39,9 @@ class LoginWindow(QWidget):
         user = self.username.text()
         password = self.password.text()
 
-        if user == "admin" and password == "admin":
-            QMessageBox.information(self, "Succes", "Login Admin reusit")
+        result = authenticate(user, password)
+
+        if result:
+            QMessageBox.information(self, "Succes", f"Bine ai venit {result['role']}")
         else:
             QMessageBox.warning(self, "Eroare", "Date incorecte")
