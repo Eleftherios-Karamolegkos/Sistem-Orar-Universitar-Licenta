@@ -4,6 +4,9 @@ from PyQt6.QtWidgets import (
 )
 
 from backend.auth_service import authenticate
+from ui.admin_dashboard import AdminDashboard
+from ui.profesor_dashboard import ProfesorDashboard
+from ui.student_dashboard import StudentDashboard
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -42,6 +45,19 @@ class LoginWindow(QWidget):
         result = authenticate(user, password)
 
         if result:
-            QMessageBox.information(self, "Succes", f"Bine ai venit {result['role']}")
+            role = result["role"]
+
+            if role == "admin":
+                self.dashboard = AdminDashboard()
+
+            elif role == "profesor":
+                self.dashboard = ProfesorDashboard()
+
+            else:
+                self.dashboard = StudentDashboard()
+
+            self.dashboard.show()
+            self.close()
+
         else:
             QMessageBox.warning(self, "Eroare", "Date incorecte")
