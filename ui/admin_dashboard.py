@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton,
     QHBoxLayout, QVBoxLayout, QStackedWidget
 )
-
+from ui.orar_page import OrarPage
 
 class AdminDashboard(QWidget):
 
@@ -39,7 +39,7 @@ class AdminDashboard(QWidget):
         page_studenti = QLabel("Gestionare Studenti")
         page_materii = QLabel("Gestionare Materii")
         page_sali = QLabel("Gestionare Sali")
-        page_orar = QLabel("Gestionare Orar")
+        page_orar = OrarPage()
 
         self.pages.addWidget(page_dashboard)
         self.pages.addWidget(page_profesori)
