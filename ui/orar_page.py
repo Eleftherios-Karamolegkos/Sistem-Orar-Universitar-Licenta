@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 
 from backend.orar_service import get_orar, add_orar
 from backend.orar_service import check_conflict
+from backend.orar_service import generate_orar
 
 class OrarPage(QWidget):
     def __init__(self):
@@ -30,6 +31,9 @@ class OrarPage(QWidget):
         add_btn = QPushButton("Adauga Orar")
         add_btn.clicked.connect(self.adauga)
 
+        gen_btn = QPushButton("Genereaza Orar Automat")
+        gen_btn.clicked.connect(self.genereaza_orar)
+
         self.table = QTableWidget()
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(["Zi", "Ora", "Materie", "Profesor", "Sala"])
@@ -42,6 +46,7 @@ class OrarPage(QWidget):
         layout.addWidget(self.sala)
         layout.addWidget(add_btn)
         layout.addWidget(self.table)
+        layout.addWidget(gen_btn)
 
         self.setLayout(layout)
         self.load_data()
@@ -72,4 +77,6 @@ class OrarPage(QWidget):
         add_orar(zi, ora, materie, profesor, sala)
         self.load_data()
 
-    
+    def genereaza_orar(self):
+        generate_orar()
+        self.load_data()
