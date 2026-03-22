@@ -35,6 +35,7 @@ def check_conflict(zi, ora, profesor, sala):
     conn.close()
     return result
 
+
 def generate_orar():
     zile = ["Luni", "Marti", "Miercuri", "Joi", "Vineri"]
     ore = ["09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-19:00"]
@@ -70,3 +71,20 @@ def generate_orar():
                 """, (zi, ora, materie, profesor, sala))
     conn.commit()
     conn.close()
+
+def get_orar_student(grupa):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM orar WHERE grupa=%s", (grupa,))
+    data = cursor.fetchall()
+    conn.close()
+    return data
+    
+def get_orar_profesor(nume):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM orar WHERE profesor=%s", (nume,))
+    data = cursor.fetchall()
+    conn.close()
+    return data
+    

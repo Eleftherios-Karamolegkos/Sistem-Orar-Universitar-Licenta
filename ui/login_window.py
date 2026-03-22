@@ -51,10 +51,10 @@ class LoginWindow(QWidget):
                 self.dashboard = AdminDashboard()
 
             elif role == "profesor":
-                self.dashboard = ProfesorDashboard()
+                self.dashboard = ProfesorDashboard(user)
 
             else:
-                self.dashboard = StudentDashboard()
+                self.dashboard = StudentDashboard("A1")
 
             self.dashboard.show()
             self.close()
