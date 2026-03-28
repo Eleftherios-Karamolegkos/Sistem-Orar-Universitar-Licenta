@@ -1,12 +1,13 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton,
     QTableWidget, QTableWidgetItem,
-    QLineEdit, QLabel, QComboBox
+    QLineEdit, QLabel, QComboBox, QMessageBox
 )
 
 from backend.orar_service import get_orar, add_orar
 from backend.orar_service import check_conflict
 from backend.orar_service import generate_orar
+
 
 class OrarPage(QWidget):
     def __init__(self):
@@ -80,3 +81,5 @@ class OrarPage(QWidget):
     def genereaza_orar(self):
         generate_orar()
         self.load_data()
+        QMessageBox.information(self, "Succes", "Orarul a fost generat automat!")
+

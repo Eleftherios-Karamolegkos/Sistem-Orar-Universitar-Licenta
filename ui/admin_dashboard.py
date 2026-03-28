@@ -1,3 +1,5 @@
+from turtle import title
+
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton,
     QHBoxLayout, QVBoxLayout, QStackedWidget
@@ -14,13 +16,22 @@ class AdminDashboard(QWidget):
 
         # meniu stanga
         menu_layout = QVBoxLayout()
+        title = QLabel("Sistem Management Orar Universitar")
+        title.setStyleSheet("font-size:18px; font-weight:bold; padding:10px;")
+        menu_layout.addWidget(title)
 
         btn_dashboard = QPushButton("Dashboard")
+        btn_dashboard.setStyleSheet("text-align:left; padding:10px;")
         btn_profesori = QPushButton("Profesori")
+        btn_profesori.setStyleSheet("text-align:left; padding:10px;")
         btn_studenti = QPushButton("Studenti")
+        btn_studenti.setStyleSheet("text-align:left; padding:10px;")
         btn_materii = QPushButton('Materii')
+        btn_materii.setStyleSheet("text-align:left; padding:10px;")
         btn_sali = QPushButton("Sali")
+        btn_sali.setStyleSheet("text-align:left; padding:10px;")
         btn_orar = QPushButton("Orar")
+        btn_orar.setStyleSheet("text-align:left; padding:10px;")
 
         menu_layout.addWidget(btn_dashboard)
         menu_layout.addWidget(btn_profesori)
