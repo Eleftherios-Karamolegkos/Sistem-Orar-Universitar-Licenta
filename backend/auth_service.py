@@ -1,11 +1,9 @@
-import hashlib
-
-from backend.database.db import get_connection
+from backend.database.db import get_connection, hash_password
 
 
 def authenticate(username, password):
     username = username.strip()
-    password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    password_hash = hash_password(password)
 
     connection = get_connection()
     try:

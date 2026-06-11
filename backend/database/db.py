@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
+    initial_password TEXT NOT NULL DEFAULT '',
     role TEXT NOT NULL CHECK (role IN ('admin', 'profesor', 'student')),
     full_name TEXT NOT NULL,
     an INTEGER
@@ -69,14 +70,26 @@ def initialize_database():
     connection = get_connection()
     try:
         connection.executescript(SCHEMA)
+        _migrate_database(connection)
         _seed_database(connection)
         connection.commit()
     finally:
         connection.close()
 
 
-def _hash_password(password):
+def hash_password(password):
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def _migrate_database(connection):
+    columns = {
+        row["name"]
+        for row in connection.execute("PRAGMA table_info(users)").fetchall()
+    }
+    if "initial_password" not in columns:
+        connection.execute(
+            "ALTER TABLE users ADD COLUMN initial_password TEXT NOT NULL DEFAULT ''"
+        )
 
 
 def _seed_database(connection):
@@ -90,11 +103,22 @@ def _seed_database(connection):
     ]
     connection.executemany(
         """
-        INSERT OR IGNORE INTO users (username, password_hash, role, full_name, an)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO users
+            (username, password_hash, initial_password, role, full_name, an)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        [(u, _hash_password(p), role, name, an) for u, p, role, name, an in users],
+        [(u, hash_password(p), p, role, name, an) for u, p, role, name, an in users],
     )
+    for username, password, _, _, _ in users:
+        connection.execute(
+            """
+            UPDATE users
+            SET initial_password = ?
+            WHERE username = ?
+              AND (initial_password IS NULL OR initial_password = '')
+            """,
+            (password, username),
+        )
 
     professors = [
         ("Popescu Andrei", "andrei.popescu@universitate.ro"),

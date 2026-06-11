@@ -101,9 +101,17 @@ class ManagementPage(QWidget):
             return
 
         try:
-            self.creator(**payload)
+            credentials = self.creator(**payload)
             self._clear_inputs()
             self.load_data()
+            if isinstance(credentials, dict) and credentials.get("username"):
+                QMessageBox.information(
+                    self,
+                    "Cont creat",
+                    "Contul de login a fost creat automat.\n\n"
+                    f"Username: {credentials['username']}\n"
+                    f"Parola: {credentials['password']}",
+                )
         except Exception as error:
             QMessageBox.critical(self, "Eroare", str(error))
 

@@ -1,6 +1,7 @@
 import random
 
 from backend.database.db import get_connection
+from backend.notification_service import notify_schedule_changed
 
 
 DAYS = ["Luni", "Marti", "Miercuri", "Joi", "Vineri"]
@@ -84,18 +85,31 @@ def add_orar(zi, ora, materie, profesor, sala, an):
         connection.commit()
     finally:
         connection.close()
+    notify_schedule_changed(
+        "Intrare adaugata",
+        f"{zi}, {ora}, anul {an}, {materie}, {profesor}, sala {sala}",
+    )
 
 
 def delete_orar(entry_id=None):
     connection = get_connection()
     try:
         if entry_id is None:
+            details = "Toate intrarile din orar au fost sterse."
             connection.execute("DELETE FROM orar")
+            action = "Orar golit"
         else:
+            existing = connection.execute(
+                "SELECT * FROM orar WHERE id = ?",
+                (int(entry_id),),
+            ).fetchone()
+            details = _entry_details(dict(existing)) if existing else f"ID {entry_id}"
             connection.execute("DELETE FROM orar WHERE id = ?", (int(entry_id),))
+            action = "Intrare stearsa"
         connection.commit()
     finally:
         connection.close()
+    notify_schedule_changed(action, details)
 
 
 def check_conflict(zi, ora, profesor, sala, an, exclude_id=None):
@@ -144,10 +158,15 @@ def generate_orar():
             for subject in year_subjects:
                 _place_subject(connection, subject["name"], an, professors, rooms)
 
+        generated_count = connection.execute("SELECT COUNT(*) FROM orar").fetchone()[0]
         connection.commit()
     finally:
         connection.close()
 
+    notify_schedule_changed(
+        "Orar generat automat",
+        f"Au fost generate {generated_count} intrari.",
+    )
     return get_orar()
 
 
@@ -208,3 +227,10 @@ def _conflict_message(conflict, profesor, sala, an):
     if conflict["an"] == int(an):
         return f"Conflict: anul {an} are deja curs in acel interval."
     return "Conflict de orar."
+
+
+def _entry_details(entry):
+    return (
+        f"{entry['zi']}, {entry['ora']}, anul {entry['an']}, "
+        f"{entry['materie']}, {entry['profesor']}, sala {entry['sala']}"
+    )

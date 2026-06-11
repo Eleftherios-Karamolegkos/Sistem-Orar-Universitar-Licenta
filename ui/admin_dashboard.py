@@ -1,10 +1,15 @@
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
+    QAbstractItemView,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QStackedWidget,
+    QHeaderView,
+    QTableWidget,
+    QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -19,6 +24,7 @@ from backend.data_service import (
     delete_student,
     delete_subject,
     list_professors,
+    list_login_accounts,
     list_rooms,
     list_students,
     list_subjects,
@@ -39,19 +45,32 @@ class AdminDashboard(QWidget):
         main_layout.setSpacing(0)
 
         sidebar = QFrame()
-        sidebar.setObjectName("panel")
+        sidebar.setObjectName("sidebar")
         sidebar.setFixedWidth(260)
         menu_layout = QVBoxLayout(sidebar)
         menu_layout.setContentsMargins(18, 22, 18, 22)
         menu_layout.setSpacing(8)
 
+        brand_layout = QHBoxLayout()
+        brand_layout.setSpacing(10)
+
+        badge = QLabel("OU")
+        badge.setObjectName("brandBadge")
+        badge.setFixedSize(44, 44)
+        badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        brand_layout.addWidget(badge)
+
+        brand_text = QVBoxLayout()
+        brand_text.setSpacing(2)
         title = QLabel("Orar Universitar")
         title.setObjectName("title")
-        menu_layout.addWidget(title)
-
         subtitle = QLabel("Panou administrare")
         subtitle.setObjectName("muted")
-        menu_layout.addWidget(subtitle)
+        brand_text.addWidget(title)
+        brand_text.addWidget(subtitle)
+        brand_layout.addLayout(brand_text)
+        menu_layout.addLayout(brand_layout)
+        menu_layout.addSpacing(18)
 
         self.pages = QStackedWidget()
         self.menu_buttons = []
@@ -166,7 +185,6 @@ class DashboardPage(QWidget):
         self.grid = QGridLayout()
         self.grid.setSpacing(14)
         layout.addLayout(self.grid)
-        layout.addStretch()
 
         self.cards = {}
         for index, key in enumerate(["orar", "profesori", "studenti", "materii", "sali"]):
@@ -174,12 +192,42 @@ class DashboardPage(QWidget):
             self.cards[key] = card
             self.grid.addWidget(card, index // 3, index % 3)
 
+        accounts_title = QLabel("Conturi de login")
+        accounts_title.setObjectName("sectionTitle")
+        layout.addWidget(accounts_title)
+
+        self.accounts_table = QTableWidget()
+        self.accounts_table.setColumnCount(5)
+        self.accounts_table.setHorizontalHeaderLabels(
+            ["Nume", "Rol", "An", "Username", "Parola initiala"]
+        )
+        self.accounts_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.accounts_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.accounts_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.accounts_table.setAlternatingRowColors(True)
+        layout.addWidget(self.accounts_table, 1)
+
         self.refresh()
 
     def refresh(self):
         stats = get_dashboard_stats()
         for key, value in stats.items():
             self.cards[key].set_value(value)
+
+        accounts = list_login_accounts()
+        self.accounts_table.setRowCount(len(accounts))
+        for row, account in enumerate(accounts):
+            values = [
+                account["full_name"],
+                account["role"],
+                account["an"] or "-",
+                account["username"],
+                account["initial_password"] or "-",
+            ]
+            for column, value in enumerate(values):
+                cell = QTableWidgetItem(str(value))
+                cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.accounts_table.setItem(row, column, cell)
 
 
 class StatCard(QFrame):
@@ -192,9 +240,9 @@ class StatCard(QFrame):
         layout.setContentsMargins(18, 18, 18, 18)
 
         title = QLabel(label)
-        title.setObjectName("muted")
+        title.setObjectName("statLabel")
         self.value = QLabel("0")
-        self.value.setObjectName("title")
+        self.value.setObjectName("statValue")
 
         layout.addWidget(title)
         layout.addWidget(self.value)
